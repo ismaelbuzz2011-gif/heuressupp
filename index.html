@@ -17,39 +17,32 @@
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bgl);color:#1a1a1a;height:100vh;overflow:hidden}
 #app{height:100vh;display:flex;flex-direction:column}
 
-/* TABS */
 .tab{display:none;flex:1;overflow-y:auto;padding-bottom:calc(var(--nav-h) + env(safe-area-inset-bottom));-webkit-overflow-scrolling:touch}
 .tab.active{display:block}
 
-/* PAGE HEADER */
 .ph{background:var(--gd);color:#fff;padding:14px 16px 10px;padding-top:max(14px,env(safe-area-inset-top));position:sticky;top:0;z-index:20}
 .ph h1{font-size:18px;font-weight:800;letter-spacing:.2px}
 .ph p{font-size:12px;opacity:.75;margin-top:2px}
 
-/* BOTTOM NAV */
 .bnav{position:fixed;bottom:0;left:0;right:0;height:var(--nav-h);padding-bottom:env(safe-area-inset-bottom);background:var(--gd);display:flex;border-top:1px solid rgba(255,255,255,.15);z-index:100}
 .nb{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;background:none;border:none;color:rgba(255,255,255,.5);cursor:pointer;padding:8px 2px}
 .nb.active{color:var(--gl)}
 .nb .ni{font-size:20px;line-height:1}
 .nb .nl{font-size:10px;font-weight:700;letter-spacing:.2px}
 
-/* CARDS */
 .card{background:var(--wh);border-radius:12px;padding:14px;margin:12px 14px 0;box-shadow:0 1px 4px rgba(0,0,0,.07)}
 .ctitle{font-size:11px;font-weight:800;color:var(--gd);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px}
 
-/* STATS */
 .sg{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:12px 14px 0}
 .sc{background:var(--wh);border-radius:12px;padding:14px 8px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,.07)}
 .sv{font-size:26px;font-weight:900;color:var(--gd);line-height:1}
 .sl{font-size:10px;color:#888;margin-top:4px;line-height:1.3}
 
-/* TABLE */
 .tbl{width:100%;border-collapse:collapse;font-size:13px}
 .tbl th{background:var(--bgl);color:var(--gd);font-weight:800;font-size:11px;text-align:left;padding:8px;border-bottom:2px solid var(--gl)}
 .tbl td{padding:8px;border-bottom:1px solid var(--bgl);vertical-align:middle}
 .tbl tr:last-child td{border-bottom:none}
 
-/* PLANNING TOOLBAR */
 .ptbar{display:flex;flex-direction:column;gap:8px;padding:10px 14px;background:var(--bgl);border-bottom:1px solid var(--bg);position:sticky;top:0;z-index:15}
 .ptrow{display:flex;align-items:center;gap:8px}
 .wnav{display:flex;align-items:center;gap:6px;flex:1}
@@ -59,17 +52,65 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .vtoggle button{flex:1;padding:5px 10px;border:none;background:none;color:#666;font-size:11px;font-weight:700;border-radius:6px;cursor:pointer;white-space:nowrap}
 .vtoggle button.active{background:var(--gd);color:#fff}
 .fsel{padding:6px 10px;border:1.5px solid var(--bg);border-radius:8px;background:var(--wh);color:var(--gd);font-size:12px;font-weight:700;appearance:none}
-.chips{display:flex;gap:6px;flex-wrap:wrap}
 .chip{padding:5px 11px;border-radius:20px;border:1.5px solid var(--gm);background:var(--wh);color:var(--gd);font-size:11px;font-weight:700;cursor:pointer}
 .chip.active{background:var(--gm);color:#fff}
 
-/* PLANNING GRID */
+/* ═══ PLANNING GRID ═══ */
 .pgwrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
 .pgrid{border-collapse:collapse;font-size:11px;width:100%;min-width:500px}
 .pgrid th{background:var(--gd);color:#fff;padding:7px 5px;text-align:center;font-size:10px;font-weight:700;white-space:nowrap;min-width:58px}
 .pgrid th.dc{min-width:68px;text-align:left;position:sticky;left:0;z-index:6;background:var(--gd)}
-.pgrid td{padding:5px 4px;text-align:center;border:1px solid #e8e8e8;vertical-align:middle;min-width:58px;font-size:11px;line-height:1.3}
+.pgrid td{padding:5px 4px;text-align:center;border:1px solid #e8e8e8;vertical-align:middle;min-width:58px;font-size:11px;line-height:1.3;transition:background .15s}
 .pgrid td.daycell{background:var(--bgl);font-weight:700;font-size:10px;text-align:left;position:sticky;left:0;z-index:5;min-width:68px;padding:5px 7px;color:#444}
+
+/* ═══ DRAG & DROP ═══ */
+.shift-cell{
+  cursor:grab;
+  border-radius:6px;
+  padding:4px 3px;
+  min-height:36px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  transition:opacity .15s, transform .1s, box-shadow .15s;
+  user-select:none;
+  -webkit-user-select:none;
+  position:relative;
+}
+.shift-cell:active{cursor:grabbing}
+.shift-cell.dragging{
+  opacity:.4;
+  transform:scale(.95);
+}
+.shift-cell.drag-over{
+  box-shadow:0 0 0 3px var(--gm), inset 0 0 0 2px rgba(82,183,136,.3);
+  transform:scale(1.05);
+}
+.shift-cell .shift-label{font-weight:700;font-size:11px}
+.shift-cell .shift-sub{font-size:9px;color:#666;margin-top:2px}
+.drag-ghost{
+  position:fixed;
+  pointer-events:none;
+  z-index:9999;
+  background:var(--gd);
+  color:#fff;
+  padding:6px 10px;
+  border-radius:8px;
+  font-size:12px;
+  font-weight:700;
+  box-shadow:0 4px 16px rgba(0,0,0,.3);
+  transform:translate(-50%,-50%);
+  transition:none;
+  opacity:.9;
+}
+.drag-hint{
+  font-size:10px;
+  color:var(--gm);
+  text-align:center;
+  padding:4px 14px 0;
+  font-style:italic;
+}
 
 /* SHIFT COLORS */
 .sRH{background:#ffcdd2}
@@ -79,6 +120,32 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .sM{background:var(--green-p)}
 .sS{background:var(--blue-l)}
 .sN{background:#f3e5f5}
+.sVIDE{background:#f9f9f9;color:#ccc}
+
+/* UNDO BAR */
+.undo-bar{
+  position:fixed;
+  bottom:calc(var(--nav-h) + 12px);
+  left:50%;
+  transform:translateX(-50%);
+  background:#1a1a1a;
+  color:#fff;
+  padding:10px 16px;
+  border-radius:12px;
+  font-size:13px;
+  font-weight:600;
+  z-index:998;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  box-shadow:0 4px 20px rgba(0,0,0,.3);
+  opacity:0;
+  transition:opacity .25s;
+  pointer-events:none;
+  white-space:nowrap;
+}
+.undo-bar.show{opacity:1;pointer-events:all}
+.undo-bar button{background:var(--gm);border:none;color:#fff;padding:5px 12px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer}
 
 /* FORMS */
 .fg{margin-bottom:14px}
@@ -92,13 +159,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .btn-s{padding:9px 14px;background:var(--bgl);color:var(--gd);border:1.5px solid var(--gm);border-radius:10px;font-size:13px;font-weight:700;cursor:pointer}
 .btn-sm{padding:7px 12px;background:var(--gm);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer}
 
-/* RECAP */
 .rnav{display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--bgl);border-bottom:1px solid var(--bg)}
 .rnav .ml{flex:1;text-align:center;font-size:15px;font-weight:800;color:var(--gd)}
 .rtxt{background:var(--bgl);border:1px solid var(--bg);border-radius:10px;padding:14px;font-family:'Courier New',monospace;font-size:12px;white-space:pre-wrap;line-height:1.7;min-height:200px;color:#333;max-height:55vh;overflow-y:auto}
 .btn-cp{width:100%;padding:13px;background:var(--gm);color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:800;cursor:pointer;margin-top:10px}
 
-/* ÉQUIPES */
 .tsec{margin-bottom:4px}
 .tname{font-size:13px;font-weight:800;color:var(--gd);padding:8px 0 6px;display:flex;align-items:center;justify-content:space-between}
 .elist{display:flex;flex-wrap:wrap;gap:6px;padding-bottom:8px}
@@ -107,7 +172,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .addrow{display:flex;gap:8px;align-items:center;margin-top:8px}
 .addrow input{flex:1;padding:8px 11px;border:1.5px solid var(--bg);border-radius:8px;font-size:13px;background:var(--wh)}
 
-/* LISTE */
 .mfbar{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--bgl);border-bottom:1px solid var(--bg);position:sticky;top:0;z-index:15}
 .mfbar .ml{flex:1;text-align:center;font-size:14px;font-weight:800;color:var(--gd)}
 .ri{background:var(--wh);border-radius:10px;padding:12px 14px;margin:8px 14px 0;box-shadow:0 1px 3px rgba(0,0,0,.06);display:flex;align-items:flex-start;gap:10px}
@@ -121,7 +185,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .rdur{font-size:15px;font-weight:900;color:var(--gm);white-space:nowrap}
 .drbtn{background:#ffebee;border:none;border-radius:8px;padding:7px 9px;color:#c62828;font-size:13px;cursor:pointer}
 
-/* EMPTY & MISC */
 .empty{text-align:center;padding:40px 20px;color:#bbb}
 .empty .ei{font-size:40px;margin-bottom:10px}
 .empty p{font-size:14px}
@@ -132,7 +195,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .istatus{font-size:12px;color:var(--gd);padding:4px 14px;font-style:italic}
 .sep{height:1px;background:var(--bgl);margin:10px 0}
 
-/* MODAL */
 .modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;overflow-y:auto}
 .modal-bg.open{display:block}
 .modal{background:#fff;border-radius:20px 20px 0 0;margin-top:50px;min-height:calc(100vh - 50px);padding:20px 16px;padding-bottom:calc(40px + env(safe-area-inset-bottom))}
@@ -140,7 +202,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .modal-head h2{font-size:16px;font-weight:800;color:var(--gd)}
 .modal-close{background:var(--bgl);border:none;padding:8px 12px;border-radius:8px;cursor:pointer;font-size:16px;color:#666}
 
-/* EDUC VIEW */
 .evsec{background:var(--wh);border-radius:12px;padding:12px;margin:8px 14px 0;box-shadow:0 1px 3px rgba(0,0,0,.06)}
 .evhead{font-size:13px;font-weight:800;color:var(--gd);margin-bottom:8px}
 .evrow{display:flex;align-items:center;padding:6px 0;border-bottom:1px solid var(--bgl)}
@@ -149,18 +210,20 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .evshift{padding:3px 9px;border-radius:7px;font-size:11px;font-weight:700;margin-right:6px}
 .evrep{font-size:10px;flex:1}
 
-/* MANUAL GRID */
 .mgrid{width:100%;border-collapse:collapse;font-size:12px}
 .mgrid th{background:var(--gd);color:#fff;padding:8px 6px;font-size:11px;font-weight:700}
 .mgrid td{padding:4px;border:1px solid var(--bg)}
 .mgrid input{width:100%;padding:5px;border:none;background:var(--bgl);border-radius:4px;font-size:12px;text-align:center;text-transform:uppercase}
 .mgrid td:first-child{background:var(--bgl);font-weight:700;font-size:11px;padding:5px 8px;white-space:nowrap}
+
+/* EXPORT BTN */
+.btn-export{padding:7px 14px;background:#1a5276;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px}
 </style>
 </head>
 <body>
 <div id="app">
 
-<!-- ══════════════ TABLEAU ══════════════ -->
+<!-- TABLEAU -->
 <div class="tab active" id="tab-tableau">
   <div class="ph"><h1>MECS Logis Saint-François</h1><p id="th-month"></p></div>
   <div class="sg">
@@ -178,7 +241,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   </div>
 </div>
 
-<!-- ══════════════ PLANNING ══════════════ -->
+<!-- PLANNING -->
 <div class="tab" id="tab-planning">
   <div class="ptbar">
     <div class="ptrow">
@@ -190,6 +253,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
         <option value="">Tous</option>
       </select>
       <button class="btn-sm" onclick="openManual()">+ Saisie</button>
+      <button class="btn-export" onclick="exportPlanning()">⬇ XLS</button>
     </div>
     <div class="ptrow">
       <div class="wnav">
@@ -206,10 +270,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <input type="file" id="xlsx-in" accept=".xlsx,.xls" style="display:none" onchange="importXL(this)">
   </label>
   <div class="istatus" id="istatus"></div>
+  <div class="drag-hint" id="drag-hint" style="display:none">✋ Glisse un nom d'une case à l'autre pour l'échanger</div>
   <div id="p-content"></div>
 </div>
 
-<!-- ══════════════ NOUVEAU ══════════════ -->
+<!-- NOUVEAU -->
 <div class="tab" id="tab-nouveau">
   <div class="ph"><h1>Nouveau remplacement</h1></div>
   <div class="card">
@@ -226,14 +291,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <div class="fg">
       <label class="fl">Horaires</label>
       <div class="r2">
-        <div>
-          <label class="fl" style="font-size:10px">Début</label>
-          <input type="time" class="fc" id="f-start" onchange="fCalcDur()">
-        </div>
-        <div>
-          <label class="fl" style="font-size:10px">Fin</label>
-          <input type="time" class="fc" id="f-end" onchange="fCalcDur()">
-        </div>
+        <div><label class="fl" style="font-size:10px">Début</label><input type="time" class="fc" id="f-start" onchange="fCalcDur()"></div>
+        <div><label class="fl" style="font-size:10px">Fin</label><input type="time" class="fc" id="f-end" onchange="fCalcDur()"></div>
       </div>
     </div>
     <div class="dur" id="f-dur">Durée : —</div>
@@ -261,7 +320,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   </div>
 </div>
 
-<!-- ══════════════ RÉCAP ══════════════ -->
+<!-- RÉCAP -->
 <div class="tab" id="tab-recap">
   <div class="ph"><h1>Récapitulatif comptabilité</h1></div>
   <div class="rnav">
@@ -275,7 +334,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   </div>
 </div>
 
-<!-- ══════════════ ÉQUIPES ══════════════ -->
+<!-- ÉQUIPES -->
 <div class="tab" id="tab-equipes">
   <div class="ph"><h1>Équipes</h1></div>
   <div class="card">
@@ -290,7 +349,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   </div>
 </div>
 
-<!-- ══════════════ LISTE ══════════════ -->
+<!-- LISTE -->
 <div class="tab" id="tab-liste">
   <div class="ph"><h1>Liste des remplacements</h1></div>
   <div class="mfbar">
@@ -306,7 +365,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   <div id="liste-content"></div>
 </div>
 
-</div><!-- #app -->
+</div>
 
 <!-- BOTTOM NAV -->
 <nav class="bnav">
@@ -318,7 +377,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   <button class="nb" onclick="showTab('liste')" id="nav-liste"><span class="ni">📝</span><span class="nl">Liste</span></button>
 </nav>
 
-<!-- MANUAL PLANNING MODAL -->
+<!-- MANUAL MODAL -->
 <div class="modal-bg" id="manual-modal">
   <div class="modal">
     <div class="modal-head">
@@ -338,7 +397,16 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   </div>
 </div>
 
+<!-- UNDO BAR -->
+<div class="undo-bar" id="undo-bar">
+  <span id="undo-msg">Échange effectué</span>
+  <button onclick="undoLast()">↩ Annuler</button>
+</div>
+
 <div class="toast" id="toast"></div>
+
+<!-- Ghost element for drag -->
+<div class="drag-ghost" id="drag-ghost" style="display:none"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script>
@@ -352,6 +420,7 @@ const DEFAULT = {
 };
 
 let S = { teams:{}, repls:[], planning:{} };
+let undoStack = []; // {week, days snapshot}
 
 function load(){
   try {
@@ -372,7 +441,7 @@ const MONTHS_S = ['jan','fév','mar','avr','mai','jun','jul','aoû','sep','oct',
 const DAYS = ['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
 
 function today(){ return new Date().toISOString().slice(0,10); }
-function mk(d){ return d.slice(0,7); } // "2026-05"
+function mk(d){ return d.slice(0,7); }
 function mlabel(mk){ const [y,m]=mk.split('-'); return `${MONTHS[+m-1]} ${y}`; }
 function fmtShort(d){ const[,m,day]=d.split('-'); return `${day}/${m}`; }
 function fmtLong(d){ const[y,m,day]=d.split('-'); return `${day} ${MONTHS_S[+m-1]} ${y}`; }
@@ -411,6 +480,8 @@ function toast(msg){
   setTimeout(()=>el.classList.remove('show'),2500);
 }
 
+function fmtH(h){ return h%1===0?h:h.toFixed(2); }
+
 // ════════════════════════════════════
 // TAB NAVIGATION
 // ════════════════════════════════════
@@ -442,7 +513,6 @@ function populateGroupFilter(id, withAll=false){
 function renderTableau(){
   const mk_now=mk(today());
   document.getElementById('th-month').textContent=mlabel(mk_now);
-
   const mr=S.repls.filter(r=>mk(r.date)===mk_now);
   document.getElementById('st-nb').textContent=mr.length;
   const th=mr.reduce((s,r)=>s+(r.dur||0),0);
@@ -472,8 +542,6 @@ function renderTableau(){
   }
 }
 
-function fmtH(h){ return h%1===0?h:h.toFixed(2); }
-
 // ════════════════════════════════════
 // PLANNING
 // ════════════════════════════════════
@@ -498,9 +566,9 @@ function renderPlanning(){
   const wd=weekDates(curWeek);
   document.getElementById('wlabel').textContent=
     `S${curWeek.split('-W')[1]} · ${fmtShort(wd[0])}–${fmtShort(wd[6])}`;
-
-  const gf=document.getElementById('p-gfilter').value;
-  pView==='week'?renderWeek(wd,gf):renderEduc(wd,gf);
+  const hasData=!!S.planning[curWeek];
+  document.getElementById('drag-hint').style.display=hasData&&pView==='week'?'block':'none';
+  pView==='week'?renderWeek(wd):renderEduc(wd);
 }
 
 function educsForGroup(g){
@@ -509,7 +577,7 @@ function educsForGroup(g){
 }
 
 function shiftCls(s){
-  if(!s) return '';
+  if(!s) return 'sVIDE';
   const u=s.toUpperCase().trim();
   if(u==='RH') return 'sRH';
   if(u==='ECRITS'||u==='VF') return 'sECRITS';
@@ -522,7 +590,15 @@ function shiftCls(s){
   return '';
 }
 
-function renderWeek(wd, gf){
+// ════════════════════════════════════
+// DRAG & DROP STATE
+// ════════════════════════════════════
+let dragSrc=null; // {date, educ, shift}
+let ghost=null;
+let dragOverCell=null;
+
+function renderWeek(wd){
+  const gf=document.getElementById('p-gfilter').value;
   const educs=educsForGroup(gf);
   const pw=S.planning[curWeek]||{};
 
@@ -545,35 +621,238 @@ function renderWeek(wd, gf){
   </tr></thead><tbody>`;
 
   wd.forEach((ds,i)=>{
-    const dayPlan=pw[ds]||{};
+    const dayPlan=(pw.days||pw)[ds]||{};
     const dayRepl=ri[ds]||{};
     h+=`<tr><td class="daycell">${DAYS[i]}<br><span style="font-size:9px;color:#888">${fmtShort(ds)}</span></td>`;
     educs.forEach(educ=>{
       const shift=dayPlan[educ]||'';
-      let cls=shiftCls(shift), content=shift, extra='';
+      let cls=shiftCls(shift);
       const rep=dayRepl[educ];
+      let repHtml='';
       if(rep){
-        if(rep.t==='absent'){ cls='sRH'; extra=`<div style="color:#c62828;font-size:9px;margin-top:2px">↗ ${rep.by}</div>`; }
-        else{ cls='sREMP'; extra=`<div style="color:#e65100;font-size:9px;margin-top:2px">★ ${rep.for}</div>`; }
+        if(rep.t==='absent') repHtml=`<div class="shift-sub" style="color:#c62828">↗ ${rep.by}</div>`;
+        else repHtml=`<div class="shift-sub" style="color:#e65100">★ ${rep.for}</div>`;
+        cls=rep.t==='absent'?'sRH':'sREMP';
       }
-      h+=`<td class="${cls}">${content}${extra}</td>`;
+      h+=`<td>
+        <div class="shift-cell ${cls}"
+          draggable="true"
+          data-date="${ds}"
+          data-educ="${educ}"
+          data-shift="${shift}"
+          ontouchstart="touchStart(event,this)"
+          ontouchmove="touchMove(event)"
+          ontouchend="touchEnd(event)"
+        >
+          <div class="shift-label">${shift||'—'}</div>
+          ${repHtml}
+        </div>
+      </td>`;
     });
     h+='</tr>';
   });
 
   h+='</tbody></table></div>';
   document.getElementById('p-content').innerHTML=h;
+
+  // Attach drag events
+  document.querySelectorAll('.shift-cell').forEach(cell=>{
+    cell.addEventListener('dragstart', onDragStart);
+    cell.addEventListener('dragover', onDragOver);
+    cell.addEventListener('dragleave', onDragLeave);
+    cell.addEventListener('drop', onDrop);
+    cell.addEventListener('dragend', onDragEnd);
+  });
 }
 
-function renderEduc(wd, gf){
+// ════════ DESKTOP DRAG ════════
+function onDragStart(e){
+  dragSrc={
+    date: e.currentTarget.dataset.date,
+    educ: e.currentTarget.dataset.educ,
+    shift: e.currentTarget.dataset.shift
+  };
+  e.currentTarget.classList.add('dragging');
+  e.dataTransfer.effectAllowed='move';
+  e.dataTransfer.setData('text/plain', dragSrc.shift);
+}
+
+function onDragOver(e){
+  e.preventDefault();
+  e.dataTransfer.dropEffect='move';
+  if(dragOverCell) dragOverCell.classList.remove('drag-over');
+  dragOverCell=e.currentTarget;
+  dragOverCell.classList.add('drag-over');
+}
+
+function onDragLeave(e){
+  e.currentTarget.classList.remove('drag-over');
+}
+
+function onDrop(e){
+  e.preventDefault();
+  const tgt={
+    date: e.currentTarget.dataset.date,
+    educ: e.currentTarget.dataset.educ,
+    shift: e.currentTarget.dataset.shift
+  };
+  if(dragSrc && (dragSrc.date!==tgt.date || dragSrc.educ!==tgt.educ)){
+    doSwap(dragSrc, tgt);
+  }
+  e.currentTarget.classList.remove('drag-over');
+}
+
+function onDragEnd(e){
+  e.currentTarget.classList.remove('dragging');
+  if(dragOverCell) dragOverCell.classList.remove('drag-over');
+  dragSrc=null; dragOverCell=null;
+}
+
+// ════════ TOUCH DRAG ════════
+let touchDragSrc=null;
+let touchGhost=null;
+
+function touchStart(e, el){
+  touchDragSrc={
+    el,
+    date: el.dataset.date,
+    educ: el.dataset.educ,
+    shift: el.dataset.shift
+  };
+  // Create ghost
+  touchGhost=document.getElementById('drag-ghost');
+  touchGhost.textContent=`${el.dataset.educ} · ${el.dataset.shift||'—'}`;
+  touchGhost.style.display='block';
+  const t=e.touches[0];
+  touchGhost.style.left=t.clientX+'px';
+  touchGhost.style.top=t.clientY+'px';
+  el.classList.add('dragging');
+  e.preventDefault();
+}
+
+function touchMove(e){
+  if(!touchDragSrc) return;
+  e.preventDefault();
+  const t=e.touches[0];
+  touchGhost.style.left=t.clientX+'px';
+  touchGhost.style.top=t.clientY+'px';
+
+  // Find element under touch
+  touchGhost.style.display='none';
+  const under=document.elementFromPoint(t.clientX, t.clientY);
+  touchGhost.style.display='block';
+
+  document.querySelectorAll('.shift-cell.drag-over').forEach(c=>c.classList.remove('drag-over'));
+  const targetCell=under?.closest('.shift-cell');
+  if(targetCell && targetCell!==touchDragSrc.el){
+    targetCell.classList.add('drag-over');
+  }
+}
+
+function touchEnd(e){
+  if(!touchDragSrc) return;
+  const t=e.changedTouches[0];
+  touchGhost.style.display='none';
+  touchDragSrc.el.classList.remove('dragging');
+  document.querySelectorAll('.shift-cell.drag-over').forEach(c=>c.classList.remove('drag-over'));
+
+  touchGhost.style.display='none';
+  const under=document.elementFromPoint(t.clientX, t.clientY);
+  const targetCell=under?.closest('.shift-cell');
+
+  if(targetCell && targetCell!==touchDragSrc.el){
+    const tgt={
+      date: targetCell.dataset.date,
+      educ: targetCell.dataset.educ,
+      shift: targetCell.dataset.shift
+    };
+    doSwap(touchDragSrc, tgt);
+  }
+  touchDragSrc=null;
+}
+
+// ════════ SWAP LOGIC ════════
+function doSwap(src, tgt){
+  // Save undo snapshot
+  const snap=deepCopy((S.planning[curWeek]||{}).days||S.planning[curWeek]||{});
+  undoStack.push({week:curWeek, snap});
+  if(undoStack.length>20) undoStack.shift();
+
+  if(!S.planning[curWeek]) S.planning[curWeek]={educators:[],days:{}};
+  // Normalize to .days structure
+  if(!S.planning[curWeek].days){
+    S.planning[curWeek]={educators:[], days: deepCopy(S.planning[curWeek])};
+  }
+  const days=S.planning[curWeek].days;
+
+  // Ensure day objects exist
+  if(!days[src.date]) days[src.date]={};
+  if(!days[tgt.date]) days[tgt.date]={};
+
+  const srcShift=days[src.date][src.educ]||'';
+  const tgtShift=days[tgt.date][tgt.educ]||'';
+
+  // Check if same day → swap assignments between educators
+  // Different days or same day: swap the shift values
+  if(src.date===tgt.date && src.educ!==tgt.educ){
+    // Same day: swap educator assignments
+    if(tgtShift) days[src.date][src.educ]=tgtShift;
+    else delete days[src.date][src.educ];
+    if(srcShift) days[tgt.date][tgt.educ]=srcShift;
+    else delete days[tgt.date][tgt.educ];
+    showUndo(`${src.educ} ↔ ${tgt.educ} échangés (${fmtShort(src.date)})`);
+  } else if(src.date!==tgt.date && src.educ===tgt.educ){
+    // Same educator, different days: swap shifts
+    if(tgtShift) days[src.date][src.educ]=tgtShift;
+    else delete days[src.date][src.educ];
+    if(srcShift) days[tgt.date][tgt.educ]=srcShift;
+    else delete days[tgt.date][tgt.educ];
+    showUndo(`${src.educ} : ${fmtShort(src.date)} ↔ ${fmtShort(tgt.date)}`);
+  } else {
+    // Cross: swap both
+    if(tgtShift) days[src.date][src.educ]=tgtShift;
+    else delete days[src.date][src.educ];
+    if(srcShift) days[tgt.date][tgt.educ]=srcShift;
+    else delete days[tgt.date][tgt.educ];
+    showUndo(`Échange effectué`);
+  }
+
+  save();
+  renderPlanning();
+}
+
+// ════════ UNDO ════════
+let undoTimer=null;
+function showUndo(msg){
+  const bar=document.getElementById('undo-bar');
+  document.getElementById('undo-msg').textContent=msg;
+  bar.classList.add('show');
+  clearTimeout(undoTimer);
+  undoTimer=setTimeout(()=>bar.classList.remove('show'), 5000);
+}
+
+function undoLast(){
+  if(!undoStack.length){ toast('Rien à annuler'); return; }
+  const {week, snap}=undoStack.pop();
+  if(!S.planning[week]) S.planning[week]={educators:[],days:{}};
+  S.planning[week].days=snap;
+  save();
+  document.getElementById('undo-bar').classList.remove('show');
+  renderPlanning();
+  toast('✅ Annulé');
+}
+
+function renderEduc(wd){
+  const gf=document.getElementById('p-gfilter').value;
   const educs=educsForGroup(gf);
   const pw=S.planning[curWeek]||{};
+  const days=pw.days||pw;
 
   let h='';
   educs.forEach(educ=>{
     h+=`<div class="evsec"><div class="evhead">${educ}</div>`;
     wd.forEach((ds,i)=>{
-      const shift=(pw[ds]||{})[educ]||'—';
+      const shift=(days[ds]||{})[educ]||'—';
       const cls=shiftCls(shift);
       const rep=S.repls.find(r=>r.date===ds&&(r.replaced===educ||r.replacedBy===educ));
       let repHtml='';
@@ -622,7 +901,6 @@ function importXL(inp){
 }
 
 function parseSheet(sheetName, data){
-  // Find header row with educator names
   let hRow=0, eCols=[];
   for(let r=0;r<Math.min(5,data.length);r++){
     const row=data[r];
@@ -650,6 +928,7 @@ function parseSheet(sheetName, data){
   }
 
   if(!S.planning[wk]) S.planning[wk]={educators:[],days:{}};
+  else if(!S.planning[wk].days) S.planning[wk]={educators:[],days:deepCopy(S.planning[wk])};
   Object.assign(S.planning[wk].days, days);
   S.planning[wk].educators=[...new Set([...S.planning[wk].educators,...eCols.map(e=>e.n)])];
 }
@@ -658,7 +937,6 @@ function detectWK(name, data, hRow){
   let m;
   m=name.match(/(\d{4})-?W(\d{1,2})/i); if(m) return `${m[1]}-W${p2(+m[2])}`;
   m=name.match(/[Ss](?:emaine\s*)?(\d{1,2})/); if(m) return `${new Date().getFullYear()}-W${p2(+m[1])}`;
-  // Look for a date in data
   for(let r=hRow+1;r<Math.min(hRow+4,data.length);r++){
     const v=data[r][0];
     if(v instanceof Date) return weekKey(v.toISOString().slice(0,10));
@@ -674,7 +952,6 @@ function parseDayCell(val, wk, wd){
   if(m){ const yr=m[3]||wk.split('-')[0]; return `${yr}-${p2(+m[2])}-${p2(+m[1])}`; }
   m=val.match(/(\d{1,2})\.(\d{1,2})\.(\d{4})/);
   if(m) return `${m[3]}-${p2(+m[2])}-${p2(+m[1])}`;
-  // Day name
   const dm={'lun':0,'mar':1,'mer':2,'jeu':3,'ven':4,'sam':5,'dim':6,
     'lundi':0,'mardi':1,'mercredi':2,'jeudi':3,'vendredi':4,'samedi':5,'dimanche':6};
   const low=val.toLowerCase().replace(/[^a-z]/g,'');
@@ -692,21 +969,43 @@ function parseDateStr(s){
 }
 
 // ════════════════════════════════════
+// EXPORT EXCEL
+// ════════════════════════════════════
+function exportPlanning(){
+  const pw=S.planning[curWeek];
+  if(!pw){ toast('⚠ Aucun planning cette semaine'); return; }
+  const wd=weekDates(curWeek);
+  const days=pw.days||pw;
+  const educs=pw.educators&&pw.educators.length?pw.educators:
+    [...new Set(wd.flatMap(ds=>Object.keys(days[ds]||{})))];
+
+  const rows=[['Jour',...educs]];
+  wd.forEach((ds,i)=>{
+    rows.push([`${DAYS[i]} ${fmtShort(ds)}`,...educs.map(e=>(days[ds]||{})[e]||'')]);
+  });
+
+  const ws=XLSX.utils.aoa_to_sheet(rows);
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,`S${curWeek.split('-W')[1]}`);
+  XLSX.writeFile(wb,`planning_${curWeek}.xlsx`);
+  toast('✅ Fichier exporté');
+}
+
+// ════════════════════════════════════
 // MANUAL PLANNING MODAL
 // ════════════════════════════════════
 let manualData={};
 
 function openManual(){
   manualData={};
-  document.getElementById('manual-wlabel').textContent=
-    `S${curWeek.split('-W')[1]}`;
+  document.getElementById('manual-wlabel').textContent=`S${curWeek.split('-W')[1]}`;
   const sel=document.getElementById('manual-group');
   sel.innerHTML='<option value="">Tous</option>'+
     Object.keys(S.teams).map(g=>`<option value="${g}">${g}</option>`).join('');
-  // Pre-fill from existing planning
   const pw=S.planning[curWeek]||{};
+  const days=pw.days||pw;
   const wd=weekDates(curWeek);
-  wd.forEach(ds=>{ manualData[ds]=Object.assign({},pw[ds]||{}); });
+  wd.forEach(ds=>{ manualData[ds]=Object.assign({},days[ds]||{}); });
   renderManualGrid();
   document.getElementById('manual-modal').classList.add('open');
 }
@@ -725,7 +1024,7 @@ function renderManualGrid(){
     h+=`<tr><td>${DAYS[i]} ${fmtShort(ds)}</td>`;
     educs.forEach(educ=>{
       const v=(manualData[ds]||{})[educ]||'';
-      h+=`<td><input type="text" maxlength="8" value="${v}" data-date="${ds}" data-educ="${educ}" onchange="manualCellChange(this)"></td>`;
+      h+=`<td><input type="text" maxlength="12" value="${v}" data-date="${ds}" data-educ="${educ}" onchange="manualCellChange(this)"></td>`;
     });
     h+='</tr>';
   });
@@ -743,9 +1042,9 @@ function manualCellChange(inp){
 
 function saveManual(){
   if(!S.planning[curWeek]) S.planning[curWeek]={educators:[],days:{}};
+  else if(!S.planning[curWeek].days) S.planning[curWeek]={educators:[],days:deepCopy(S.planning[curWeek])};
   const wd=weekDates(curWeek);
   wd.forEach(ds=>{ S.planning[curWeek].days[ds]=Object.assign({},manualData[ds]||{}); });
-  // Collect educators
   const allE=new Set();
   wd.forEach(ds=>Object.keys(S.planning[curWeek].days[ds]||{}).forEach(e=>allE.add(e)));
   S.planning[curWeek].educators=[...allE];
@@ -768,7 +1067,6 @@ function initForm(){
   document.getElementById('f-dur').textContent='Durée : —';
   document.getElementById('f-note').value='';
   fUpdateGroup();
-  // Fill replacer with all educators
   document.getElementById('f-replacer').innerHTML=
     '<option value="">— Sélectionner —</option>'+
     allEducs().map(e=>`<option value="${e}">${e}</option>`).join('');
@@ -797,17 +1095,10 @@ function saveRepl(){
   const replacedBy=document.getElementById('f-replacer').value;
   const reason=document.getElementById('f-reason').value;
   const note=document.getElementById('f-note').value;
-
   if(!group||!date||!start||!end||!replaced||!replacedBy){
     toast('⚠ Remplissez tous les champs obligatoires'); return;
   }
-
-  S.repls.push({
-    id:Date.now().toString(), group, date,
-    startTime:start, endTime:end,
-    dur:calcH(start,end),
-    replaced, replacedBy, reason, note
-  });
+  S.repls.push({id:Date.now().toString(),group,date,startTime:start,endTime:end,dur:calcH(start,end),replaced,replacedBy,reason,note});
   save();
   toast('✅ Remplacement enregistré');
   initForm();
@@ -828,7 +1119,6 @@ function chRecap(d){
 function renderRecap(){
   document.getElementById('recap-ml').textContent=mlabel(recapMK);
   const repls=S.repls.filter(r=>mk(r.date)===recapMK).sort((a,b)=>a.date.localeCompare(b.date));
-
   if(!repls.length){ document.getElementById('recap-txt').textContent='Aucun remplacement ce mois.'; return; }
 
   const [y,m]=recapMK.split('-');
@@ -991,12 +1281,10 @@ initForm();
 renderRecap();
 renderEquipes();
 renderListe();
-// Populate group filters
 populateGroupFilter('p-gfilter');
 populateGroupFilter('liste-gf',true);
 document.getElementById('recap-ml').textContent=mlabel(recapMK);
 document.getElementById('liste-ml').textContent=mlabel(listeMK);
-// Init planning display
 const wd0=weekDates(curWeek);
 document.getElementById('wlabel').textContent=
   `S${curWeek.split('-W')[1]} · ${fmtShort(wd0[0])}–${fmtShort(wd0[6])}`;
