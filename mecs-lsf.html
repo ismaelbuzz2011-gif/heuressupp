@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>LSF — Remplacements</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --gd:#2d6a4f;--gm:#52b788;--gl:#95d5b2;
+  --bg:#ede8d8;--bgl:#f5f2eb;--wh:#ffffff;
+  --red-l:#ffcdd2;--blue-l:#bbdefb;--green-p:#e8f5e9;
+  --orange:#ffe082;--nav-h:72px;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bgl);color:#1a1a1a;height:100vh;overflow:hidden}
+#app{height:100vh;display:flex;flex-direction:column}
+
+/* TABS */
+.tab{display:none;flex:1;overflow-y:auto;padding-bottom:calc(var(--nav-h) + env(safe-area-inset-bottom));-webkit-overflow-scrolling:touch}
+.tab.active{display:block}
+
+/* PAGE HEADER */
+.ph{background:var(--gd);color:#fff;padding:14px 16px 10px;padding-top:max(14px,env(safe-area-inset-top));position:sticky;top:0;z-index:20}
+.ph h1{font-size:18px;font-weight:800;letter-spacing:.2px}
+.ph p{font-size:12px;opacity:.75;margin-top:2px}
+
+/* BOTTOM NAV */
+.bnav{position:fixed;bottom:0;left:0;right:0;height:var(--nav-h);padding-bottom:env(safe-area-inset-bottom);background:var(--gd);display:flex;border-top:1px solid rgba(255,255,255,.15);z-index:100}
+.nb{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;background:none;border:none;color:rgba(255,255,255,.5);cursor:pointer;padding:8px 2px}
+.nb.active{color:var(--gl)}
+.nb .ni{font-size:20px;line-height:1}
+.nb .nl{font-size:10px;font-weight:700;letter-spacing:.2px}
+
+/* CARDS */
+.card{background:var(--wh);border-radius:12px;padding:14px;margin:12px 14px 0;box-shadow:0 1px 4px rgba(0,0,0,.07)}
+.ctitle{font-size:11px;font-weight:800;color:var(--gd);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px}
+
+/* STATS */
+.sg{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:12px 14px 0}
+.sc{background:var(--wh);border-radius:12px;padding:14px 8px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,.07)}
+.sv{font-size:26px;font-weight:900;color:var(--gd);line-height:1}
+.sl{font-size:10px;color:#888;margin-top:4px;line-height:1.3}
+
+/* TABLE */
+.tbl{width:100%;border-collapse:collapse;font-size:13px}
+.tbl th{background:var(--bgl);color:var(--gd);font-weight:800;font-size:11px;text-align:left;padding:8px;border-bottom:2px solid var(--gl)}
+.tbl td{padding:8px;border-bottom:1px solid var(--bgl);vertical-align:middle}
+.tbl tr:last-child td{border-bottom:none}
+
+/* PLANNING TOOLBAR */
+.ptbar{display:flex;flex-direction:column;gap:8px;padding:10px 14px;background:var(--bgl);border-bottom:1px solid var(--bg);position:sticky;top:0;z-index:15}
+.ptrow{display:flex;align-items:center;gap:8px}
+.wnav{display:flex;align-items:center;gap:6px;flex:1}
+.wlabel{font-size:13px;font-weight:700;color:var(--gd);text-align:center;flex:1}
+.bico{width:32px;height:32px;border-radius:50%;border:none;background:var(--gm);color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700}
+.vtoggle{display:flex;background:var(--bg);border-radius:8px;padding:2px}
+.vtoggle button{flex:1;padding:5px 10px;border:none;background:none;color:#666;font-size:11px;font-weight:700;border-radius:6px;cursor:pointer;white-space:nowrap}
+.vtoggle button.active{background:var(--gd);color:#fff}
+.fsel{padding:6px 10px;border:1.5px solid var(--bg);border-radius:8px;background:var(--wh);color:var(--gd);font-size:12px;font-weight:700;appearance:none}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{padding:5px 11px;border-radius:20px;border:1.5px solid var(--gm);background:var(--wh);color:var(--gd);font-size:11px;font-weight:700;cursor:pointer}
+.chip.active{background:var(--gm);color:#fff}
+
+/* PLANNING GRID */
+.pgwrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.pgrid{border-collapse:collapse;font-size:11px;width:100%;min-width:500px}
+.pgrid th{background:var(--gd);color:#fff;padding:7px 5px;text-align:center;font-size:10px;font-weight:700;white-space:nowrap;min-width:58px}
+.pgrid th.dc{min-width:68px;text-align:left;position:sticky;left:0;z-index:6;background:var(--gd)}
+.pgrid td{padding:5px 4px;text-align:center;border:1px solid #e8e8e8;vertical-align:middle;min-width:58px;font-size:11px;line-height:1.3}
+.pgrid td.daycell{background:var(--bgl);font-weight:700;font-size:10px;text-align:left;position:sticky;left:0;z-index:5;min-width:68px;padding:5px 7px;color:#444}
+
+/* SHIFT COLORS */
+.sRH{background:#ffcdd2}
+.sECRITS,.sVF{background:#c8e6c9}
+.sCA,.sCT,.sFERIE{background:var(--bg);font-style:italic}
+.sREMP{background:var(--orange);font-weight:700}
+.sM{background:var(--green-p)}
+.sS{background:var(--blue-l)}
+.sN{background:#f3e5f5}
+
+/* FORMS */
+.fg{margin-bottom:14px}
+.fl{display:block;font-size:11px;font-weight:800;color:var(--gd);margin-bottom:5px;text-transform:uppercase;letter-spacing:.4px}
+.fc{width:100%;padding:11px 12px;border:1.5px solid var(--bg);border-radius:10px;font-size:15px;background:var(--wh);color:#1a1a1a;appearance:none;-webkit-appearance:none}
+.fc:focus{outline:none;border-color:var(--gm);box-shadow:0 0 0 3px rgba(82,183,136,.2)}
+.r2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.dur{background:var(--gl);color:var(--gd);font-weight:800;font-size:14px;padding:9px 12px;border-radius:9px;text-align:center;margin:-6px 0 14px}
+.btn-p{width:100%;padding:14px;background:var(--gd);color:#fff;border:none;border-radius:12px;font-size:16px;font-weight:800;cursor:pointer;letter-spacing:.3px}
+.btn-p:active{opacity:.85}
+.btn-s{padding:9px 14px;background:var(--bgl);color:var(--gd);border:1.5px solid var(--gm);border-radius:10px;font-size:13px;font-weight:700;cursor:pointer}
+.btn-sm{padding:7px 12px;background:var(--gm);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer}
+
+/* RECAP */
+.rnav{display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--bgl);border-bottom:1px solid var(--bg)}
+.rnav .ml{flex:1;text-align:center;font-size:15px;font-weight:800;color:var(--gd)}
+.rtxt{background:var(--bgl);border:1px solid var(--bg);border-radius:10px;padding:14px;font-family:'Courier New',monospace;font-size:12px;white-space:pre-wrap;line-height:1.7;min-height:200px;color:#333;max-height:55vh;overflow-y:auto}
+.btn-cp{width:100%;padding:13px;background:var(--gm);color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:800;cursor:pointer;margin-top:10px}
+
+/* ÉQUIPES */
+.tsec{margin-bottom:4px}
+.tname{font-size:13px;font-weight:800;color:var(--gd);padding:8px 0 6px;display:flex;align-items:center;justify-content:space-between}
+.elist{display:flex;flex-wrap:wrap;gap:6px;padding-bottom:8px}
+.etag{display:flex;align-items:center;gap:4px;background:var(--gl);color:var(--gd);padding:5px 10px;border-radius:20px;font-size:12px;font-weight:700}
+.etag .dx{background:none;border:none;color:var(--gd);opacity:.55;font-size:15px;cursor:pointer;padding:0;line-height:1}
+.addrow{display:flex;gap:8px;align-items:center;margin-top:8px}
+.addrow input{flex:1;padding:8px 11px;border:1.5px solid var(--bg);border-radius:8px;font-size:13px;background:var(--wh)}
+
+/* LISTE */
+.mfbar{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--bgl);border-bottom:1px solid var(--bg);position:sticky;top:0;z-index:15}
+.mfbar .ml{flex:1;text-align:center;font-size:14px;font-weight:800;color:var(--gd)}
+.ri{background:var(--wh);border-radius:10px;padding:12px 14px;margin:8px 14px 0;box-shadow:0 1px 3px rgba(0,0,0,.06);display:flex;align-items:flex-start;gap:10px}
+.rdb{background:var(--gd);color:#fff;border-radius:8px;padding:6px 8px;text-align:center;min-width:44px;flex-shrink:0}
+.rdb .rd{font-size:19px;font-weight:900;line-height:1}
+.rdb .rm{font-size:9px;font-weight:700;opacity:.8}
+.rinfo{flex:1;min-width:0}
+.rtit{font-size:13px;font-weight:700;color:#1a1a1a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rsub{font-size:11px;color:#666;margin-top:2px}
+.rbadge{font-size:10px;padding:2px 7px;border-radius:10px;background:var(--bgl);color:var(--gd);font-weight:800;margin-top:4px;display:inline-block}
+.rdur{font-size:15px;font-weight:900;color:var(--gm);white-space:nowrap}
+.drbtn{background:#ffebee;border:none;border-radius:8px;padding:7px 9px;color:#c62828;font-size:13px;cursor:pointer}
+
+/* EMPTY & MISC */
+.empty{text-align:center;padding:40px 20px;color:#bbb}
+.empty .ei{font-size:40px;margin-bottom:10px}
+.empty p{font-size:14px}
+.toast{position:fixed;bottom:calc(var(--nav-h) + 16px);left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:10px 20px;border-radius:20px;font-size:13px;font-weight:700;z-index:999;opacity:0;transition:opacity .3s;white-space:nowrap;pointer-events:none}
+.toast.show{opacity:1}
+.iarea{background:var(--bgl);border:2px dashed var(--gm);border-radius:12px;padding:18px;text-align:center;cursor:pointer;margin:10px 14px 0;display:block}
+.iarea p{font-size:13px;color:var(--gd);margin-top:4px}
+.istatus{font-size:12px;color:var(--gd);padding:4px 14px;font-style:italic}
+.sep{height:1px;background:var(--bgl);margin:10px 0}
+
+/* MODAL */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;overflow-y:auto}
+.modal-bg.open{display:block}
+.modal{background:#fff;border-radius:20px 20px 0 0;margin-top:50px;min-height:calc(100vh - 50px);padding:20px 16px;padding-bottom:calc(40px + env(safe-area-inset-bottom))}
+.modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.modal-head h2{font-size:16px;font-weight:800;color:var(--gd)}
+.modal-close{background:var(--bgl);border:none;padding:8px 12px;border-radius:8px;cursor:pointer;font-size:16px;color:#666}
+
+/* EDUC VIEW */
+.evsec{background:var(--wh);border-radius:12px;padding:12px;margin:8px 14px 0;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.evhead{font-size:13px;font-weight:800;color:var(--gd);margin-bottom:8px}
+.evrow{display:flex;align-items:center;padding:6px 0;border-bottom:1px solid var(--bgl)}
+.evrow:last-child{border-bottom:none}
+.evday{width:80px;font-size:11px;color:#555;font-weight:700;flex-shrink:0}
+.evshift{padding:3px 9px;border-radius:7px;font-size:11px;font-weight:700;margin-right:6px}
+.evrep{font-size:10px;flex:1}
+
+/* MANUAL GRID */
+.mgrid{width:100%;border-collapse:collapse;font-size:12px}
+.mgrid th{background:var(--gd);color:#fff;padding:8px 6px;font-size:11px;font-weight:700}
+.mgrid td{padding:4px;border:1px solid var(--bg)}
+.mgrid input{width:100%;padding:5px;border:none;background:var(--bgl);border-radius:4px;font-size:12px;text-align:center;text-transform:uppercase}
+.mgrid td:first-child{background:var(--bgl);font-weight:700;font-size:11px;padding:5px 8px;white-space:nowrap}
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- ══════════════ TABLEAU ══════════════ -->
+<div class="tab active" id="tab-tableau">
+  <div class="ph"><h1>MECS Logis Saint-François</h1><p id="th-month"></p></div>
+  <div class="sg">
+    <div class="sc"><div class="sv" id="st-nb">0</div><div class="sl">Remplace&shy;ments</div></div>
+    <div class="sc"><div class="sv" id="st-h">0</div><div class="sl">Heures totales</div></div>
+    <div class="sc"><div class="sv" id="st-e">0</div><div class="sl">Éducateurs concernés</div></div>
+  </div>
+  <div class="card">
+    <div class="ctitle">Heures par remplaçant (mois)</div>
+    <div id="th-hrepl"></div>
+  </div>
+  <div class="card" style="margin-bottom:0">
+    <div class="ctitle">5 derniers remplacements</div>
+    <div id="th-last5"></div>
+  </div>
+</div>
+
+<!-- ══════════════ PLANNING ══════════════ -->
+<div class="tab" id="tab-planning">
+  <div class="ptbar">
+    <div class="ptrow">
+      <div class="vtoggle">
+        <button class="active" id="vw-btn" onclick="setPView('week')">Semaine</button>
+        <button id="ve-btn" onclick="setPView('educ')">Éducateur</button>
+      </div>
+      <select class="fsel" id="p-gfilter" onchange="renderPlanning()" style="flex:1">
+        <option value="">Tous</option>
+      </select>
+      <button class="btn-sm" onclick="openManual()">+ Saisie</button>
+    </div>
+    <div class="ptrow">
+      <div class="wnav">
+        <button class="bico" onclick="chWeek(-1)">‹</button>
+        <div class="wlabel" id="wlabel">—</div>
+        <button class="bico" onclick="chWeek(1)">›</button>
+      </div>
+    </div>
+  </div>
+  <label class="iarea" for="xlsx-in">
+    <div style="font-size:30px">📂</div>
+    <p><strong>Importer planning Excel (.xlsx)</strong></p>
+    <p style="font-size:11px;color:#888">Chaque onglet = une semaine</p>
+    <input type="file" id="xlsx-in" accept=".xlsx,.xls" style="display:none" onchange="importXL(this)">
+  </label>
+  <div class="istatus" id="istatus"></div>
+  <div id="p-content"></div>
+</div>
+
+<!-- ══════════════ NOUVEAU ══════════════ -->
+<div class="tab" id="tab-nouveau">
+  <div class="ph"><h1>Nouveau remplacement</h1></div>
+  <div class="card">
+    <div class="fg">
+      <label class="fl">Groupe / Unité</label>
+      <select class="fc" id="f-group" onchange="fUpdateGroup()">
+        <option value="">— Sélectionner —</option>
+      </select>
+    </div>
+    <div class="fg">
+      <label class="fl">Date</label>
+      <input type="date" class="fc" id="f-date">
+    </div>
+    <div class="fg">
+      <label class="fl">Horaires</label>
+      <div class="r2">
+        <div>
+          <label class="fl" style="font-size:10px">Début</label>
+          <input type="time" class="fc" id="f-start" onchange="fCalcDur()">
+        </div>
+        <div>
+          <label class="fl" style="font-size:10px">Fin</label>
+          <input type="time" class="fc" id="f-end" onchange="fCalcDur()">
+        </div>
+      </div>
+    </div>
+    <div class="dur" id="f-dur">Durée : —</div>
+    <div class="fg">
+      <label class="fl">Éducateur remplacé</label>
+      <select class="fc" id="f-replaced"><option value="">— Choisir un groupe d'abord —</option></select>
+    </div>
+    <div class="fg">
+      <label class="fl">Éducateur remplaçant</label>
+      <select class="fc" id="f-replacer"><option value="">— Sélectionner —</option></select>
+    </div>
+    <div class="fg">
+      <label class="fl">Motif</label>
+      <select class="fc" id="f-reason">
+        <option>Maladie</option><option>Congé annuel</option><option>Congé trimestriel</option>
+        <option>Formation</option><option>Repos hebdomadaire</option>
+        <option>Urgence familiale</option><option>Accident de travail</option><option>Autre</option>
+      </select>
+    </div>
+    <div class="fg">
+      <label class="fl">Note libre</label>
+      <textarea class="fc" id="f-note" rows="3" placeholder="Observations…" style="resize:none"></textarea>
+    </div>
+    <button class="btn-p" onclick="saveRepl()">✔ Enregistrer le remplacement</button>
+  </div>
+</div>
+
+<!-- ══════════════ RÉCAP ══════════════ -->
+<div class="tab" id="tab-recap">
+  <div class="ph"><h1>Récapitulatif comptabilité</h1></div>
+  <div class="rnav">
+    <button class="bico" onclick="chRecap(-1)">‹</button>
+    <div class="ml" id="recap-ml">—</div>
+    <button class="bico" onclick="chRecap(1)">›</button>
+  </div>
+  <div class="card">
+    <div class="rtxt" id="recap-txt">Aucun remplacement ce mois.</div>
+    <button class="btn-cp" onclick="copyRecap()">📋 Copier pour mail comptabilité</button>
+  </div>
+</div>
+
+<!-- ══════════════ ÉQUIPES ══════════════ -->
+<div class="tab" id="tab-equipes">
+  <div class="ph"><h1>Équipes</h1></div>
+  <div class="card">
+    <div id="eq-list"></div>
+    <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--bgl)">
+      <div class="ctitle">Nouveau groupe</div>
+      <div class="addrow">
+        <input type="text" id="ng-name" placeholder="Nom du groupe" style="text-transform:uppercase">
+        <button class="btn-sm" onclick="addGroup()">+ Créer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ LISTE ══════════════ -->
+<div class="tab" id="tab-liste">
+  <div class="ph"><h1>Liste des remplacements</h1></div>
+  <div class="mfbar">
+    <button class="bico" onclick="chListe(-1)">‹</button>
+    <div class="ml" id="liste-ml">—</div>
+    <button class="bico" onclick="chListe(1)">›</button>
+  </div>
+  <div style="padding:8px 14px;background:var(--bgl);border-bottom:1px solid var(--bg)">
+    <select class="fsel" id="liste-gf" onchange="renderListe()" style="width:100%">
+      <option value="">Tous les groupes</option>
+    </select>
+  </div>
+  <div id="liste-content"></div>
+</div>
+
+</div><!-- #app -->
+
+<!-- BOTTOM NAV -->
+<nav class="bnav">
+  <button class="nb active" onclick="showTab('tableau')" id="nav-tableau"><span class="ni">📊</span><span class="nl">Tableau</span></button>
+  <button class="nb" onclick="showTab('planning')" id="nav-planning"><span class="ni">📅</span><span class="nl">Planning</span></button>
+  <button class="nb" onclick="showTab('nouveau')" id="nav-nouveau"><span class="ni">➕</span><span class="nl">Nouveau</span></button>
+  <button class="nb" onclick="showTab('recap')" id="nav-recap"><span class="ni">📋</span><span class="nl">Récap</span></button>
+  <button class="nb" onclick="showTab('equipes')" id="nav-equipes"><span class="ni">👥</span><span class="nl">Équipes</span></button>
+  <button class="nb" onclick="showTab('liste')" id="nav-liste"><span class="ni">📝</span><span class="nl">Liste</span></button>
+</nav>
+
+<!-- MANUAL PLANNING MODAL -->
+<div class="modal-bg" id="manual-modal">
+  <div class="modal">
+    <div class="modal-head">
+      <h2>Saisie planning — <span id="manual-wlabel"></span></h2>
+      <button class="modal-close" onclick="closeManual()">✕</button>
+    </div>
+    <div id="manual-group-sel" style="margin-bottom:12px">
+      <label class="fl">Groupe</label>
+      <select class="fc" id="manual-group" onchange="renderManualGrid()">
+        <option value="">Tous</option>
+      </select>
+    </div>
+    <div style="overflow-x:auto;-webkit-overflow-scrolling:touch">
+      <div id="manual-grid-wrap"></div>
+    </div>
+    <button class="btn-p" style="margin-top:16px" onclick="saveManual()">✔ Enregistrer</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script>
+// ════════════════════════════════════
+// STATE & STORAGE
+// ════════════════════════════════════
+const DEFAULT = {
+  "Château":   ["YERO","CHLOE B","FLORIAN","MOUSSA","JULIEN","CECILIA","TIDIANE"],
+  "Grand Chêne":["CHLOE D","ANTHONY","REMPLAÇANT"],
+  "ITEP":      ["CHLOE D","ANTHONY"]
+};
+
+let S = { teams:{}, repls:[], planning:{} };
+
+function load(){
+  try {
+    const d = localStorage.getItem('mecs_v3');
+    if(d) S = Object.assign({teams:{},repls:[],planning:{}}, JSON.parse(d));
+    else S.teams = deepCopy(DEFAULT);
+  } catch(e){ S.teams = deepCopy(DEFAULT); }
+}
+function save(){ localStorage.setItem('mecs_v3', JSON.stringify(S)); }
+function deepCopy(o){ return JSON.parse(JSON.stringify(o)); }
+
+// ════════════════════════════════════
+// UTILS
+// ════════════════════════════════════
+const p2 = n => String(n).padStart(2,'0');
+const MONTHS = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+const MONTHS_S = ['jan','fév','mar','avr','mai','jun','jul','aoû','sep','oct','nov','déc'];
+const DAYS = ['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
+
+function today(){ return new Date().toISOString().slice(0,10); }
+function mk(d){ return d.slice(0,7); } // "2026-05"
+function mlabel(mk){ const [y,m]=mk.split('-'); return `${MONTHS[+m-1]} ${y}`; }
+function fmtShort(d){ const[,m,day]=d.split('-'); return `${day}/${m}`; }
+function fmtLong(d){ const[y,m,day]=d.split('-'); return `${day} ${MONTHS_S[+m-1]} ${y}`; }
+
+function calcH(s,e){
+  const [sh,sm]=s.split(':').map(Number), [eh,em]=e.split(':').map(Number);
+  let d=(eh*60+em)-(sh*60+sm); if(d<0)d+=1440; return d/60;
+}
+
+function weekKey(date){
+  const d=new Date(date); d.setHours(12);
+  d.setDate(d.getDate()+3-(d.getDay()+6)%7);
+  const w1=new Date(d.getFullYear(),0,4);
+  const wn=1+Math.round(((d-w1)/86400000-3+(w1.getDay()+6)%7)/7);
+  return `${d.getFullYear()}-W${p2(wn)}`;
+}
+
+function weekDates(wk){
+  const [yr,wn]=wk.split('-W').map(Number);
+  const jan4=new Date(yr,0,4);
+  const mon=new Date(jan4);
+  mon.setDate(jan4.getDate()-((jan4.getDay()+6)%7)+(wn-1)*7);
+  return Array.from({length:7},(_,i)=>{
+    const d=new Date(mon); d.setDate(mon.getDate()+i);
+    return `${d.getFullYear()}-${p2(d.getMonth()+1)}-${p2(d.getDate())}`;
+  });
+}
+
+function allEducs(){
+  return [...new Set(Object.values(S.teams).flat())].sort();
+}
+
+function toast(msg){
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'),2500);
+}
+
+// ════════════════════════════════════
+// TAB NAVIGATION
+// ════════════════════════════════════
+let activeTab='tableau';
+function showTab(t){
+  document.querySelectorAll('.tab').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.nb').forEach(el=>el.classList.remove('active'));
+  document.getElementById('tab-'+t).classList.add('active');
+  document.getElementById('nav-'+t).classList.add('active');
+  activeTab=t;
+  if(t==='tableau') renderTableau();
+  if(t==='planning'){ populateGroupFilter('p-gfilter'); renderPlanning(); }
+  if(t==='nouveau') initForm();
+  if(t==='recap') renderRecap();
+  if(t==='equipes') renderEquipes();
+  if(t==='liste'){ populateGroupFilter('liste-gf',true); renderListe(); }
+}
+
+function populateGroupFilter(id, withAll=false){
+  const sel=document.getElementById(id);
+  const cur=sel.value;
+  sel.innerHTML=(withAll?'<option value="">Tous les groupes</option>':'<option value="">Tous</option>')+
+    Object.keys(S.teams).map(g=>`<option value="${g}" ${cur===g?'selected':''}>${g}</option>`).join('');
+}
+
+// ════════════════════════════════════
+// TABLEAU
+// ════════════════════════════════════
+function renderTableau(){
+  const mk_now=mk(today());
+  document.getElementById('th-month').textContent=mlabel(mk_now);
+
+  const mr=S.repls.filter(r=>mk(r.date)===mk_now);
+  document.getElementById('st-nb').textContent=mr.length;
+  const th=mr.reduce((s,r)=>s+(r.dur||0),0);
+  document.getElementById('st-h').textContent=fmtH(th);
+  document.getElementById('st-e').textContent=new Set(mr.map(r=>r.replaced)).size;
+
+  const byR={};
+  mr.forEach(r=>{ byR[r.replacedBy]=(byR[r.replacedBy]||0)+(r.dur||0); });
+  const hEl=document.getElementById('th-hrepl');
+  if(!Object.keys(byR).length){
+    hEl.innerHTML='<div class="empty"><p>Aucun remplacement ce mois</p></div>';
+  } else {
+    const rows=Object.entries(byR).sort((a,b)=>b[1]-a[1]);
+    hEl.innerHTML=`<table class="tbl"><thead><tr><th>Remplaçant</th><th>Heures</th></tr></thead><tbody>${
+      rows.map(([n,h])=>`<tr><td>${n}</td><td style="font-weight:800;color:var(--gd)">${fmtH(h)}h</td></tr>`).join('')
+    }</tbody></table>`;
+  }
+
+  const last5=[...S.repls].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,5);
+  const l5=document.getElementById('th-last5');
+  if(!last5.length){
+    l5.innerHTML='<div class="empty"><p>Aucun remplacement</p></div>';
+  } else {
+    l5.innerHTML=`<table class="tbl"><thead><tr><th>Date</th><th>Remplacé</th><th>Par</th><th>H</th></tr></thead><tbody>${
+      last5.map(r=>`<tr><td>${fmtShort(r.date)}</td><td>${r.replaced}</td><td style="color:var(--gd);font-weight:700">${r.replacedBy}</td><td>${fmtH(r.dur)}h</td></tr>`).join('')
+    }</tbody></table>`;
+  }
+}
+
+function fmtH(h){ return h%1===0?h:h.toFixed(2); }
+
+// ════════════════════════════════════
+// PLANNING
+// ════════════════════════════════════
+let curWeek=weekKey(today());
+let pView='week';
+
+function setPView(v){
+  pView=v;
+  document.getElementById('vw-btn').classList.toggle('active',v==='week');
+  document.getElementById('ve-btn').classList.toggle('active',v==='educ');
+  renderPlanning();
+}
+
+function chWeek(d){
+  const dates=weekDates(curWeek), mon=new Date(dates[0]);
+  mon.setDate(mon.getDate()+d*7);
+  curWeek=weekKey(mon.toISOString().slice(0,10));
+  renderPlanning();
+}
+
+function renderPlanning(){
+  const wd=weekDates(curWeek);
+  document.getElementById('wlabel').textContent=
+    `S${curWeek.split('-W')[1]} · ${fmtShort(wd[0])}–${fmtShort(wd[6])}`;
+
+  const gf=document.getElementById('p-gfilter').value;
+  pView==='week'?renderWeek(wd,gf):renderEduc(wd,gf);
+}
+
+function educsForGroup(g){
+  if(!g) return allEducs();
+  return S.teams[g]||[];
+}
+
+function shiftCls(s){
+  if(!s) return '';
+  const u=s.toUpperCase().trim();
+  if(u==='RH') return 'sRH';
+  if(u==='ECRITS'||u==='VF') return 'sECRITS';
+  if(u==='CA') return 'sCA';
+  if(u==='CT') return 'sCT';
+  if(u.includes('FERI')||u.includes('FÉRIÉ')) return 'sFERIE';
+  if(u==='M') return 'sM';
+  if(u==='S') return 'sS';
+  if(u==='N') return 'sN';
+  return '';
+}
+
+function renderWeek(wd, gf){
+  const educs=educsForGroup(gf);
+  const pw=S.planning[curWeek]||{};
+
+  // Build replacement index
+  const ri={};
+  S.repls.filter(r=>wd.includes(r.date)&&(!gf||r.group===gf)).forEach(r=>{
+    if(!ri[r.date]) ri[r.date]={};
+    ri[r.date][r.replaced]={t:'absent',by:r.replacedBy};
+    if(!ri[r.date][r.replacedBy]) ri[r.date][r.replacedBy]={t:'remp',for:r.replaced};
+  });
+
+  if(!educs.length){
+    document.getElementById('p-content').innerHTML='<div class="empty"><div class="ei">👥</div><p>Aucun éducateur dans ce groupe</p></div>';
+    return;
+  }
+
+  let h=`<div class="pgwrap"><table class="pgrid"><thead><tr>
+    <th class="dc">Jour</th>
+    ${educs.map(e=>`<th>${e}</th>`).join('')}
+  </tr></thead><tbody>`;
+
+  wd.forEach((ds,i)=>{
+    const dayPlan=pw[ds]||{};
+    const dayRepl=ri[ds]||{};
+    h+=`<tr><td class="daycell">${DAYS[i]}<br><span style="font-size:9px;color:#888">${fmtShort(ds)}</span></td>`;
+    educs.forEach(educ=>{
+      const shift=dayPlan[educ]||'';
+      let cls=shiftCls(shift), content=shift, extra='';
+      const rep=dayRepl[educ];
+      if(rep){
+        if(rep.t==='absent'){ cls='sRH'; extra=`<div style="color:#c62828;font-size:9px;margin-top:2px">↗ ${rep.by}</div>`; }
+        else{ cls='sREMP'; extra=`<div style="color:#e65100;font-size:9px;margin-top:2px">★ ${rep.for}</div>`; }
+      }
+      h+=`<td class="${cls}">${content}${extra}</td>`;
+    });
+    h+='</tr>';
+  });
+
+  h+='</tbody></table></div>';
+  document.getElementById('p-content').innerHTML=h;
+}
+
+function renderEduc(wd, gf){
+  const educs=educsForGroup(gf);
+  const pw=S.planning[curWeek]||{};
+
+  let h='';
+  educs.forEach(educ=>{
+    h+=`<div class="evsec"><div class="evhead">${educ}</div>`;
+    wd.forEach((ds,i)=>{
+      const shift=(pw[ds]||{})[educ]||'—';
+      const cls=shiftCls(shift);
+      const rep=S.repls.find(r=>r.date===ds&&(r.replaced===educ||r.replacedBy===educ));
+      let repHtml='';
+      if(rep){
+        if(rep.replaced===educ) repHtml=`<span style="color:#c62828;font-size:10px">↗ remplacé par <b>${rep.replacedBy}</b></span>`;
+        else repHtml=`<span style="color:#e65100;font-size:10px">★ remplace <b>${rep.replaced}</b></span>`;
+      }
+      h+=`<div class="evrow">
+        <div class="evday">${DAYS[i]} ${fmtShort(ds)}</div>
+        <span class="evshift ${cls}">${shift}</span>
+        ${repHtml}
+      </div>`;
+    });
+    h+='</div>';
+  });
+
+  document.getElementById('p-content').innerHTML=h||'<div class="empty"><div class="ei">👥</div><p>Aucun éducateur</p></div>';
+}
+
+// ════════════════════════════════════
+// EXCEL IMPORT
+// ════════════════════════════════════
+function importXL(inp){
+  const f=inp.files[0]; if(!f) return;
+  const st=document.getElementById('istatus');
+  st.textContent='Lecture en cours…';
+  const rd=new FileReader();
+  rd.onload=e=>{
+    try{
+      const wb=XLSX.read(e.target.result,{type:'binary',cellDates:true});
+      let cnt=0;
+      wb.SheetNames.forEach(name=>{
+        const ws=wb.Sheets[name];
+        const data=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
+        if(data.length>=2){ parseSheet(name,data); cnt++; }
+      });
+      save();
+      st.textContent=`✅ ${cnt} onglet(s) importé(s)`;
+      inp.value='';
+      if(activeTab==='planning') renderPlanning();
+    } catch(err){
+      st.textContent='❌ Erreur : '+err.message;
+    }
+  };
+  rd.readAsBinaryString(f);
+}
+
+function parseSheet(sheetName, data){
+  // Find header row with educator names
+  let hRow=0, eCols=[];
+  for(let r=0;r<Math.min(5,data.length);r++){
+    const row=data[r];
+    const cands=[];
+    for(let c=1;c<row.length;c++){
+      const v=String(row[c]).trim().toUpperCase();
+      if(v&&v.length>1&&!/^\d/.test(v)) cands.push({c,n:v});
+    }
+    if(cands.length>=2){ hRow=r; eCols=cands; break; }
+  }
+  if(!eCols.length) return;
+
+  const wk=detectWK(sheetName,data,hRow)||`${new Date().getFullYear()}-W00`;
+  const wd=weekDates(wk);
+  const days={};
+
+  for(let r=hRow+1;r<data.length;r++){
+    const row=data[r];
+    const dayCell=String(row[0]||'').trim();
+    if(!dayCell) continue;
+    const ds=parseDayCell(dayCell, wk, wd);
+    if(!ds) continue;
+    days[ds]={};
+    eCols.forEach(({c,n})=>{ const v=String(row[c]||'').trim(); if(v) days[ds][n]=v; });
+  }
+
+  if(!S.planning[wk]) S.planning[wk]={educators:[],days:{}};
+  Object.assign(S.planning[wk].days, days);
+  S.planning[wk].educators=[...new Set([...S.planning[wk].educators,...eCols.map(e=>e.n)])];
+}
+
+function detectWK(name, data, hRow){
+  let m;
+  m=name.match(/(\d{4})-?W(\d{1,2})/i); if(m) return `${m[1]}-W${p2(+m[2])}`;
+  m=name.match(/[Ss](?:emaine\s*)?(\d{1,2})/); if(m) return `${new Date().getFullYear()}-W${p2(+m[1])}`;
+  // Look for a date in data
+  for(let r=hRow+1;r<Math.min(hRow+4,data.length);r++){
+    const v=data[r][0];
+    if(v instanceof Date) return weekKey(v.toISOString().slice(0,10));
+    const ds=parseDateStr(String(v||''));
+    if(ds) return weekKey(ds);
+  }
+  return null;
+}
+
+function parseDayCell(val, wk, wd){
+  let m;
+  m=val.match(/(\d{1,2})\/(\d{1,2})(?:\/(\d{4}))?/);
+  if(m){ const yr=m[3]||wk.split('-')[0]; return `${yr}-${p2(+m[2])}-${p2(+m[1])}`; }
+  m=val.match(/(\d{1,2})\.(\d{1,2})\.(\d{4})/);
+  if(m) return `${m[3]}-${p2(+m[2])}-${p2(+m[1])}`;
+  // Day name
+  const dm={'lun':0,'mar':1,'mer':2,'jeu':3,'ven':4,'sam':5,'dim':6,
+    'lundi':0,'mardi':1,'mercredi':2,'jeudi':3,'vendredi':4,'samedi':5,'dimanche':6};
+  const low=val.toLowerCase().replace(/[^a-z]/g,'');
+  for(const [k,v] of Object.entries(dm)){
+    if(low.startsWith(k)&&wd[v]) return wd[v];
+  }
+  return null;
+}
+
+function parseDateStr(s){
+  let m;
+  m=s.match(/(\d{4})-(\d{2})-(\d{2})/); if(m) return `${m[1]}-${m[2]}-${m[3]}`;
+  m=s.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/); if(m) return `${m[3]}-${p2(+m[2])}-${p2(+m[1])}`;
+  return null;
+}
+
+// ════════════════════════════════════
+// MANUAL PLANNING MODAL
+// ════════════════════════════════════
+let manualData={};
+
+function openManual(){
+  manualData={};
+  document.getElementById('manual-wlabel').textContent=
+    `S${curWeek.split('-W')[1]}`;
+  const sel=document.getElementById('manual-group');
+  sel.innerHTML='<option value="">Tous</option>'+
+    Object.keys(S.teams).map(g=>`<option value="${g}">${g}</option>`).join('');
+  // Pre-fill from existing planning
+  const pw=S.planning[curWeek]||{};
+  const wd=weekDates(curWeek);
+  wd.forEach(ds=>{ manualData[ds]=Object.assign({},pw[ds]||{}); });
+  renderManualGrid();
+  document.getElementById('manual-modal').classList.add('open');
+}
+
+function closeManual(){
+  document.getElementById('manual-modal').classList.remove('open');
+}
+
+function renderManualGrid(){
+  const gf=document.getElementById('manual-group').value;
+  const educs=educsForGroup(gf);
+  const wd=weekDates(curWeek);
+
+  let h=`<table class="mgrid"><thead><tr><th>Jour</th>${educs.map(e=>`<th>${e}</th>`).join('')}</tr></thead><tbody>`;
+  wd.forEach((ds,i)=>{
+    h+=`<tr><td>${DAYS[i]} ${fmtShort(ds)}</td>`;
+    educs.forEach(educ=>{
+      const v=(manualData[ds]||{})[educ]||'';
+      h+=`<td><input type="text" maxlength="8" value="${v}" data-date="${ds}" data-educ="${educ}" onchange="manualCellChange(this)"></td>`;
+    });
+    h+='</tr>';
+  });
+  h+='</tbody></table>';
+  document.getElementById('manual-grid-wrap').innerHTML=h;
+}
+
+function manualCellChange(inp){
+  const ds=inp.dataset.date, educ=inp.dataset.educ;
+  if(!manualData[ds]) manualData[ds]={};
+  const v=inp.value.trim().toUpperCase();
+  if(v) manualData[ds][educ]=v;
+  else delete manualData[ds][educ];
+}
+
+function saveManual(){
+  if(!S.planning[curWeek]) S.planning[curWeek]={educators:[],days:{}};
+  const wd=weekDates(curWeek);
+  wd.forEach(ds=>{ S.planning[curWeek].days[ds]=Object.assign({},manualData[ds]||{}); });
+  // Collect educators
+  const allE=new Set();
+  wd.forEach(ds=>Object.keys(S.planning[curWeek].days[ds]||{}).forEach(e=>allE.add(e)));
+  S.planning[curWeek].educators=[...allE];
+  save();
+  closeManual();
+  renderPlanning();
+  toast('✅ Planning enregistré');
+}
+
+// ════════════════════════════════════
+// NOUVEAU REMPLACEMENT
+// ════════════════════════════════════
+function initForm(){
+  const gSel=document.getElementById('f-group');
+  gSel.innerHTML='<option value="">— Sélectionner —</option>'+
+    Object.keys(S.teams).map(g=>`<option value="${g}">${g}</option>`).join('');
+  document.getElementById('f-date').value=today();
+  document.getElementById('f-start').value='';
+  document.getElementById('f-end').value='';
+  document.getElementById('f-dur').textContent='Durée : —';
+  document.getElementById('f-note').value='';
+  fUpdateGroup();
+  // Fill replacer with all educators
+  document.getElementById('f-replacer').innerHTML=
+    '<option value="">— Sélectionner —</option>'+
+    allEducs().map(e=>`<option value="${e}">${e}</option>`).join('');
+}
+
+function fUpdateGroup(){
+  const g=document.getElementById('f-group').value;
+  const sel=document.getElementById('f-replaced');
+  if(!g){ sel.innerHTML='<option value="">— Choisir un groupe d\'abord —</option>'; return; }
+  sel.innerHTML='<option value="">— Éducateur remplacé —</option>'+
+    (S.teams[g]||[]).map(e=>`<option value="${e}">${e}</option>`).join('');
+}
+
+function fCalcDur(){
+  const s=document.getElementById('f-start').value, e=document.getElementById('f-end').value;
+  if(!s||!e){ document.getElementById('f-dur').textContent='Durée : —'; return; }
+  document.getElementById('f-dur').textContent=`Durée : ${fmtH(calcH(s,e))}h`;
+}
+
+function saveRepl(){
+  const group=document.getElementById('f-group').value;
+  const date=document.getElementById('f-date').value;
+  const start=document.getElementById('f-start').value;
+  const end=document.getElementById('f-end').value;
+  const replaced=document.getElementById('f-replaced').value;
+  const replacedBy=document.getElementById('f-replacer').value;
+  const reason=document.getElementById('f-reason').value;
+  const note=document.getElementById('f-note').value;
+
+  if(!group||!date||!start||!end||!replaced||!replacedBy){
+    toast('⚠ Remplissez tous les champs obligatoires'); return;
+  }
+
+  S.repls.push({
+    id:Date.now().toString(), group, date,
+    startTime:start, endTime:end,
+    dur:calcH(start,end),
+    replaced, replacedBy, reason, note
+  });
+  save();
+  toast('✅ Remplacement enregistré');
+  initForm();
+}
+
+// ════════════════════════════════════
+// RÉCAP
+// ════════════════════════════════════
+let recapMK=mk(today());
+
+function chRecap(d){
+  const [y,m]=recapMK.split('-').map(Number);
+  const nd=new Date(y,m-1+d,1);
+  recapMK=`${nd.getFullYear()}-${p2(nd.getMonth()+1)}`;
+  renderRecap();
+}
+
+function renderRecap(){
+  document.getElementById('recap-ml').textContent=mlabel(recapMK);
+  const repls=S.repls.filter(r=>mk(r.date)===recapMK).sort((a,b)=>a.date.localeCompare(b.date));
+
+  if(!repls.length){ document.getElementById('recap-txt').textContent='Aucun remplacement ce mois.'; return; }
+
+  const [y,m]=recapMK.split('-');
+  let txt=`MECS LOGIS SAINT-FRANÇOIS\n`;
+  txt+=`Récapitulatif — ${MONTHS[+m-1]} ${y}\n`;
+  txt+=`${'═'.repeat(48)}\n\n`;
+
+  const byGroup={};
+  repls.forEach(r=>{ (byGroup[r.group]||(byGroup[r.group]=[])).push(r); });
+
+  const totByRepl={};
+  let grand=0;
+
+  Object.entries(byGroup).forEach(([g,rs])=>{
+    txt+=`── ${g} ──\n`;
+    rs.forEach(r=>{
+      txt+=`  • ${fmtLong(r.date)}  ${r.startTime}→${r.endTime} (${fmtH(r.dur)}h)\n`;
+      txt+=`    Remplacé :   ${r.replaced}\n`;
+      txt+=`    Remplaçant : ${r.replacedBy}\n`;
+      txt+=`    Motif :      ${r.reason}\n`;
+      if(r.note) txt+=`    Note :       ${r.note}\n`;
+      txt+='\n';
+      totByRepl[r.replacedBy]=(totByRepl[r.replacedBy]||0)+r.dur;
+      grand+=r.dur;
+    });
+  });
+
+  txt+=`${'─'.repeat(48)}\n`;
+  txt+=`TOTAL PAR REMPLAÇANT :\n`;
+  Object.entries(totByRepl).sort((a,b)=>b[1]-a[1]).forEach(([n,h])=>{
+    txt+=`  ${n.padEnd(22)}${fmtH(h)}h\n`;
+  });
+  txt+=`${'─'.repeat(48)}\n`;
+  txt+=`TOTAL GÉNÉRAL : ${fmtH(grand)} heures\n`;
+  txt+=`${'═'.repeat(48)}\n`;
+  txt+=`\nDocument généré le ${new Date().toLocaleDateString('fr-FR')}`;
+
+  document.getElementById('recap-txt').textContent=txt;
+}
+
+function copyRecap(){
+  const txt=document.getElementById('recap-txt').textContent;
+  if(navigator.clipboard){
+    navigator.clipboard.writeText(txt).then(()=>toast('✅ Copié dans le presse-papiers')).catch(()=>fallbackCopy(txt));
+  } else fallbackCopy(txt);
+}
+function fallbackCopy(txt){
+  const ta=document.createElement('textarea');
+  ta.value=txt; ta.style.position='fixed'; ta.style.opacity='0';
+  document.body.appendChild(ta); ta.focus(); ta.select();
+  document.execCommand('copy'); document.body.removeChild(ta);
+  toast('✅ Copié');
+}
+
+// ════════════════════════════════════
+// ÉQUIPES
+// ════════════════════════════════════
+function renderEquipes(){
+  let h='';
+  Object.entries(S.teams).forEach(([g,members])=>{
+    h+=`<div class="tsec">
+      <div class="tname">${g}
+        <button class="btn-sm" style="background:#ffebee;color:#c62828" onclick="delGroup('${g}')">Supprimer</button>
+      </div>
+      <div class="elist">
+        ${members.map(m=>`<div class="etag">${m}<button class="dx" onclick="delEduc('${g}','${m}')">×</button></div>`).join('')}
+      </div>
+      <div class="addrow">
+        <input type="text" id="ne-${g}" placeholder="Nom éducateur" style="text-transform:uppercase">
+        <button class="btn-sm" onclick="addEduc('${g}')">+ Ajouter</button>
+      </div>
+    </div><div class="sep"></div>`;
+  });
+  document.getElementById('eq-list').innerHTML=h;
+}
+
+function addEduc(g){
+  const inp=document.getElementById(`ne-${g}`);
+  const n=inp.value.trim().toUpperCase();
+  if(!n) return;
+  if(S.teams[g].includes(n)){ toast('⚠ Déjà dans l\'équipe'); return; }
+  S.teams[g].push(n); save(); inp.value=''; renderEquipes();
+  toast(`✅ ${n} ajouté`);
+}
+
+function delEduc(g,n){
+  S.teams[g]=S.teams[g].filter(e=>e!==n); save(); renderEquipes();
+}
+
+function addGroup(){
+  const inp=document.getElementById('ng-name');
+  const n=inp.value.trim().toUpperCase();
+  if(!n) return;
+  if(S.teams[n]){ toast('⚠ Groupe déjà existant'); return; }
+  S.teams[n]=[]; save(); inp.value=''; renderEquipes();
+  toast(`✅ Groupe ${n} créé`);
+}
+
+function delGroup(g){
+  if(!confirm(`Supprimer le groupe "${g}" ?`)) return;
+  delete S.teams[g]; save(); renderEquipes();
+  toast(`Groupe ${g} supprimé`);
+}
+
+// ════════════════════════════════════
+// LISTE
+// ════════════════════════════════════
+let listeMK=mk(today());
+
+function chListe(d){
+  const [y,m]=listeMK.split('-').map(Number);
+  const nd=new Date(y,m-1+d,1);
+  listeMK=`${nd.getFullYear()}-${p2(nd.getMonth()+1)}`;
+  renderListe();
+}
+
+function renderListe(){
+  document.getElementById('liste-ml').textContent=mlabel(listeMK);
+  const gf=document.getElementById('liste-gf').value;
+  const repls=S.repls
+    .filter(r=>mk(r.date)===listeMK&&(!gf||r.group===gf))
+    .sort((a,b)=>b.date.localeCompare(a.date));
+
+  const el=document.getElementById('liste-content');
+  if(!repls.length){
+    el.innerHTML='<div class="empty"><div class="ei">📋</div><p>Aucun remplacement ce mois</p></div>';
+    return;
+  }
+
+  el.innerHTML=repls.map(r=>{
+    const [,mo,day]=r.date.split('-');
+    return `<div class="ri">
+      <div class="rdb"><div class="rd">${day}</div><div class="rm">${MONTHS_S[+mo-1]}</div></div>
+      <div class="rinfo">
+        <div class="rtit">${r.replaced} → ${r.replacedBy}</div>
+        <div class="rsub">${r.startTime}–${r.endTime} · ${r.reason}</div>
+        <span class="rbadge">${r.group}</span>
+        ${r.note?`<div class="rsub" style="font-style:italic;margin-top:3px">${r.note}</div>`:''}
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0">
+        <div class="rdur">${fmtH(r.dur)}h</div>
+        <button class="drbtn" onclick="delRepl('${r.id}')">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function delRepl(id){
+  if(!confirm('Supprimer ce remplacement ?')) return;
+  S.repls=S.repls.filter(r=>r.id!==id); save(); renderListe();
+  toast('Remplacement supprimé');
+}
+
+// ════════════════════════════════════
+// INIT
+// ════════════════════════════════════
+load();
+renderTableau();
+initForm();
+renderRecap();
+renderEquipes();
+renderListe();
+// Populate group filters
+populateGroupFilter('p-gfilter');
+populateGroupFilter('liste-gf',true);
+document.getElementById('recap-ml').textContent=mlabel(recapMK);
+document.getElementById('liste-ml').textContent=mlabel(listeMK);
+// Init planning display
+const wd0=weekDates(curWeek);
+document.getElementById('wlabel').textContent=
+  `S${curWeek.split('-W')[1]} · ${fmtShort(wd0[0])}–${fmtShort(wd0[6])}`;
+</script>
+</body>
+</html>
